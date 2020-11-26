@@ -1,6 +1,7 @@
 
 package fr.pchab.androidrtc;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
@@ -11,6 +12,8 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Window;
@@ -43,6 +46,7 @@ public class RtcActivity extends Activity implements WebRtcClient.RtcListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.checkPermission();
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
@@ -69,6 +73,16 @@ public class RtcActivity extends Activity implements WebRtcClient.RtcListener {
 //        pipRenderer.setEnableHardwareScaler(true /* enabled */);
 //        fullscreenRenderer.setEnableHardwareScaler(true /* enabled */);
         // Check for mandatory permissions.
+
+    }
+
+    public void checkPermission(){
+        ActivityCompat.requestPermissions(RtcActivity.this,
+                new String[]{Manifest.permission.CAPTURE_VIDEO_OUTPUT, Manifest.permission.CAPTURE_AUDIO_OUTPUT,Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE ,Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT, Manifest.permission.CAMERA, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.MODIFY_AUDIO_SETTINGS},
+                1);
+    }
+
+    public void initiate(){
         for (String permission : MANDATORY_PERMISSIONS) {
             if (checkCallingOrSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
                 setResult(RESULT_CANCELED);
@@ -81,6 +95,21 @@ public class RtcActivity extends Activity implements WebRtcClient.RtcListener {
         } else {
             init();
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case  1:{
+                Log.e("permission","1"+grantResults.length);
+//                if (grantResults.length > 0
+//                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.e("permission","initiate");
+                    initiate();
+                //}
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @TargetApi(21)
